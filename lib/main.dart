@@ -1,10 +1,10 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'screens/inbox_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   LiquidGlassWidgets.initialize(
@@ -23,9 +23,10 @@ class FinalActivityApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Directionality(
-      textDirection: TextDirection.ltr,
-      child: InboxScreen(),
+    return const CupertinoApp(
+      debugShowCheckedModeBanner: false,
+      title: 'SchoolMail',
+      home: InboxScreen(),
     );
   }
 }
