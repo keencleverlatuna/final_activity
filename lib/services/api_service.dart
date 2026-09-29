@@ -2,16 +2,25 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/email.dart';
+
 class ApiService {
   static const String baseUrl =
-      'https://YOUR-DOMAIN.com/api';
+      'https://bisque-jellyfish-119892.hostingersite.com/school_mail_api';
 
-  Future<List<dynamic>> getEmails() async {
+  static const String myEmail =
+      'keencleverlatuna19@gmail.com';
+
+  const ApiService();
+
+  Future<List<Email>> getEmails() async {
     final response = await http
         .get(
       Uri.parse('$baseUrl/emails.php'),
     )
-        .timeout(const Duration(seconds: 10));
+        .timeout(
+      const Duration(seconds: 10),
+    );
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -21,78 +30,50 @@ class ApiService {
 
     final decoded = jsonDecode(response.body);
 
-    if (decoded is Map<String, dynamic>) {
-      if (decoded['success'] == true) {
-        return decoded['data'] ?? [];
-      }
-
+    if (decoded is! Map<String, dynamic>) {
       throw Exception(
-        decoded['message']?.toString() ?? 'Failed to load emails.',
+        'Invalid response from server.',
       );
     }
 
-    throw Exception('Invalid server response.');
-  }
+    if (decoded['success'] != true) {
+      throw Exception(
+        decoded['message']?.toString() ??
+            'Failed to load emails.',
+      );
+    }
 
-  Future<bool> deleteEmail(int id) async {
-    final response = await http
-        .post(
-      Uri.parse('$baseUrl/emails.php'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'action': 'delete',
-        'id': id,
-      }),
+    final data = decoded['data'];
+
+    if (data is! List) {
+      throw Exception(
+        'Invalid email data from server.',
+      );
+    }
+
+    return data
+        .map(
+          (item) => Email.fromJson(
+        Map<String, dynamic>.from(item),
+      ),
     )
-        .timeout(const Duration(seconds: 10));
-
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Failed to delete email. Status code: ${response.statusCode}',
-      );
-    }
-
-    final decoded = jsonDecode(response.body);
-
-    if (decoded is Map<String, dynamic>) {
-      return decoded['success'] == true;
-    }
-
-    return false;
+        .toList();
   }
 
-  Future<bool> markAsRead(int id) async {
-    final response = await http
-        .post(
-      Uri.parse('$baseUrl/emails.php'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'action': 'mark_read',
-        'id': id,
-      }),
+  Future<List<Email>> getSentEmails() async {
+    final emails = await getEmails();
+
+    return emails
+        .where(
+          (email) =>
+      email.sender.toLowerCase() ==
+          myEmail.toLowerCase(),
     )
-        .timeout(const Duration(seconds: 10));
-
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Failed to update email. Status code: ${response.statusCode}',
-      );
-    }
-
-    final decoded = jsonDecode(response.body);
-
-    if (decoded is Map<String, dynamic>) {
-      return decoded['success'] == true;
-    }
-
-    return false;
+        .toList();
   }
 
-  Future<bool> sendEmail({
+  Future<void> sendEmail({
+    required String sender,
     required String recipient,
     required String subject,
     required String message,
@@ -104,12 +85,15 @@ class ApiService {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
+        'sender': sender,
         'recipient': recipient,
         'subject': subject,
         'message': message,
       }),
     )
-        .timeout(const Duration(seconds: 15));
+        .timeout(
+      const Duration(seconds: 10),
+    );
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -119,46 +103,70 @@ class ApiService {
 
     final decoded = jsonDecode(response.body);
 
-    if (decoded is Map<String, dynamic>) {
-      return decoded['success'] == true;
+    if (decoded is Map<String, dynamic> &&
+        decoded['success'] != true) {
+      throw Exception(
+        decoded['message']?.toString() ??
+            'Failed to send email.',
+      );
     }
-
-    return false;
   }
 
-  Future<bool> replyToEmail({
-    required int emailId,
-    required String recipient,
-    required String subject,
-    required String message,
-  }) async {
+  Future<void> deleteEmail(int id) async {
     final response = await http
-        .post(
-      Uri.parse('$baseUrl/reply_email.php'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email_id': emailId,
-        'recipient': recipient,
-        'subject': subject,
-        'message': message,
-      }),
+        .delete(
+      Uri.parse('$baseUrl/delete_email.php?id=$id'),
     )
-        .timeout(const Duration(seconds: 15));
+        .timeout(
+      const Duration(seconds: 10),
+    );
 
     if (response.statusCode != 200) {
       throw Exception(
-        'Failed to send reply. Status code: ${response.statusCode}',
+        'Failed to delete email. Status code: ${response.statusCode}',
       );
     }
 
     final decoded = jsonDecode(response.body);
 
-    if (decoded is Map<String, dynamic>) {
-      return decoded['success'] == true;
+    if (decoded is Map<String, dynamic> &&
+        decoded['success'] != true) {
+      throw Exception(
+        decoded['message']?.toString() ??
+            'Failed to delete email.',
+      );
+    }
+  }
+
+  Future<void> markAsRead(int id) async {
+    final response = await http
+        .post(
+      Uri.parse('$baseUrl/mark_read.php'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'id': id,
+      }),
+    )
+        .timeout(
+      const Duration(seconds: 10),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to mark email as read. Status code: ${response.statusCode}',
+      );
     }
 
-    return false;
+    final decoded = jsonDecode(response.body);
+
+    if (decoded is Map<String, dynamic> &&
+        decoded['success'] != true) {
+      throw Exception(
+        decoded['message']?.toString() ??
+            'Failed to mark email as read.',
+      );
+    }
   }
 }

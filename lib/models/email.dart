@@ -17,6 +17,26 @@ class Email {
     required this.isRead,
   });
 
+  Email copyWith({
+    int? id,
+    String? sender,
+    String? recipient,
+    String? subject,
+    String? message,
+    String? date,
+    bool? isRead,
+  }) {
+    return Email(
+      id: id ?? this.id,
+      sender: sender ?? this.sender,
+      recipient: recipient ?? this.recipient,
+      subject: subject ?? this.subject,
+      message: message ?? this.message,
+      date: date ?? this.date,
+      isRead: isRead ?? this.isRead,
+    );
+  }
+
   factory Email.fromJson(Map<String, dynamic> json) {
     return Email(
       id: int.tryParse(json['id'].toString()) ?? 0,
@@ -40,25 +60,5 @@ class Email {
       'date': date,
       'is_read': isRead ? 1 : 0,
     };
-  }
-
-  Email copyWith({
-    int? id,
-    String? sender,
-    String? recipient,
-    String? subject,
-    String? message,
-    String? date,
-    bool? isRead,
-  }) {
-    return Email(
-      id: id ?? this.id,
-      sender: sender ?? this.sender,
-      recipient: recipient ?? this.recipient,
-      subject: subject ?? this.subject,
-      message: message ?? this.message,
-      date: date ?? this.date,
-      isRead: isRead ?? this.isRead,
-    );
   }
 }
