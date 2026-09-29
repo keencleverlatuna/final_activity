@@ -64,22 +64,32 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
         ),
       ),
       appBar: GlassAppBar(
-        title: Text(
-          _getTitle(),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1E2933),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Text(
+            _getTitle(),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1E2933),
+            ),
           ),
         ),
         actions: [
-          GlassIconButton(
-            icon: const Icon(
-              CupertinoIcons.refresh,
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 10,
+              right: 8,
             ),
-            onPressed: () {
-              ref.read(emailProvider.notifier).refreshEmails();
-            },
+            child: GlassIconButton(
+              icon: const Icon(
+                CupertinoIcons.refresh,
+                size: 20,
+              ),
+              onPressed: () {
+                ref.read(emailProvider.notifier).refreshEmails();
+              },
+            ),
           ),
         ],
       ),
@@ -156,7 +166,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(
           18,
-          20,
+          34,
           18,
           120,
         ),
@@ -175,7 +185,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         18,
-        20,
+        34,
         18,
         120,
       ),
@@ -195,7 +205,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         18,
-        20,
+        34,
         18,
         120,
       ),
@@ -261,28 +271,31 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     }
 
     return Center(
-      child: GlassCard(
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _getPlaceholderIcon(),
-                size: 48,
-                color: const Color(0xFF4E5D6C),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF26333E),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: GlassCard(
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getPlaceholderIcon(),
+                  size: 48,
+                  color: const Color(0xFF4E5D6C),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF26333E),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
